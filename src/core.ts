@@ -8,6 +8,7 @@ type PropNames<Props> = Array<PropName<Props>>;
 export interface R2WCOptions<Props> {
   shadow?: "open" | "closed";
   props?: PropNames<Props> | Record<PropName<Props>, R2WCType>;
+  styles?: string;
 }
 
 export interface R2WCRenderer<Props, Context> {
@@ -160,6 +161,12 @@ export default function r2wc<Props, Context>(
     private mount() {
       if (!this.connected) throw new Error(`${ReactComponent} is not in a DOM`);
       if (this.context) throw new Error(`${ReactComponent} is already mounted`);
+
+      if (options.styles && this.shadowRoot) {
+        const styleElm = document.createElement('style');
+        styleElm.textContent = options.styles;
+        this.shadowRoot.appendChild(styleElm);
+      }
 
       this.context = renderer.mount(this.container, ReactComponent, this.props);
     }

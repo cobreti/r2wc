@@ -146,6 +146,18 @@ function App() {
 </body>
 ```
 
+## working with CSS / SCSS
+
+It's possible to use css styles (as string).  When styles present, it will be added as a style element under the shadow-root.
+
+```
+import styles from './header.scss?inline'; // ?inline is a vitejs attribute to get the content as a string
+
+const component = r2wc(App, {
+  styles
+});
+```
+
 ## Setup 🔨
 
 To install from npm:

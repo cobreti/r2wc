@@ -1,6 +1,6 @@
 {
-  "name": "r2wc",
-  "version": "0.0.4",
+  "name": "@cobreti/r2wc",
+  "version": "0.0.5",
   "license": "MIT",
   "keywords": [
     "React",
