@@ -39,9 +39,9 @@ const unmount = <Props extends object>({ root }: Context<Props>): void => {
   root.unmount();
 };
 
-export const r2wc = <Props extends object>(
+export const r2wc = <Props extends object, WebComponentApi>(
   ReactComponent: React.ComponentType<Props>,
-  options: R2WCOptions<Props> = {}
+  options: R2WCOptions<Props, WebComponentApi> = {}
 ): CustomElementConstructor => {
   return r2wcCore(ReactComponent, options, { mount, update, unmount });
 };

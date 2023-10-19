@@ -5,10 +5,12 @@ import transforms from "./transforms";
 type PropName<Props> = Extract<keyof Props, string>;
 type PropNames<Props> = Array<PropName<Props>>;
 
-export interface R2WCOptions<Props> {
+export interface R2WCOptions<Props, WebComponentApi> {
   shadow?: "open" | "closed";
   props?: PropNames<Props> | Record<PropName<Props>, R2WCType>;
   styles?: string;
+  predefinedProps?: Partial<Props>;
+  webComponentApiFactory?: () => WebComponentApi
 }
 
 export interface R2WCRenderer<Props, Context> {
@@ -30,9 +32,9 @@ const REACT_PROPS = "__reactProps";
  * @param {String?} options.shadow - Shadow DOM mode as either open or closed.
  * @param {Object|Array?} options.props - Array of camelCasedProps to watch as Strings or { [camelCasedProp]: "string" | "number" | "boolean" | "function" | "json" }
  */
-export default function r2wc<Props, Context>(
+export default function r2wc<Props, WebComponentApi, Context>(
   ReactComponent: React.ComponentType<Props>,
-  options: R2WCOptions<Props>,
+  options: R2WCOptions<Props, WebComponentApi>,
   renderer: R2WCRenderer<Props, Context>
 ): CustomElementConstructor {
   if (!options.props) {
@@ -66,6 +68,7 @@ export default function r2wc<Props, Context>(
 
   type PropsInContainer = Props & {
     container: HTMLElement;
+    webComponentApi?: WebComponentApi;
   };
 
   class ReactWebComponent extends HTMLElement {
@@ -74,6 +77,7 @@ export default function r2wc<Props, Context>(
     private _props = {} as PropsInContainer;
     container: HTMLElement;
     observer: MutationObserver;
+    webComponentApi: WebComponentApi | undefined;
 
     constructor() {
       super();
@@ -88,6 +92,11 @@ export default function r2wc<Props, Context>(
         }) as unknown as HTMLElement;
       } else {
         this.container = this;
+      }
+
+      if (options.webComponentApiFactory) {
+        this.webComponentApi = options.webComponentApiFactory();
+        this._props.webComponentApi = this.webComponentApi;
       }
 
       this._props.container = this.container;
@@ -168,7 +177,7 @@ export default function r2wc<Props, Context>(
         this.shadowRoot.appendChild(styleElm);
       }
 
-      this.context = renderer.mount(this.container, ReactComponent, this.props);
+      this.context = renderer.mount(this.container, ReactComponent, { ...this.props, ...options.predefinedProps });
     }
 
     private unmount() {
